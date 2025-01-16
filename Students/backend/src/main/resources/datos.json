@@ -1,0 +1,18 @@
+[
+    {
+        "name": "Jane Smith",
+        "enrollmentId": "67890",
+        "career": "Engineering",
+        "gpa": 3.5,
+        "subjects": ["Mechanics", "Electronics"]
+    },
+    {
+        "name": "Juan Palomo",
+        "enrollmentId": "67891",
+        "career": "Engineering",
+        "gpa": 3.8,
+        "subjects": ["Mechanics", "Maths"]
+    }
+
+
+]
