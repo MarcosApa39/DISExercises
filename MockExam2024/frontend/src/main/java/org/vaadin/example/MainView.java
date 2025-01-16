@@ -1,60 +1,60 @@
 package org.vaadin.example;
 
-import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import org.springframework.beans.factory.annotation.Autowired;
 
-/**
- * A sample Vaadin view class.
- * <p>
- * To implement a Vaadin view just extend any Vaadin component and use @Route
- * annotation to announce it in a URL as a Spring managed bean.
- * <p>
- * A new instance of this class is created for every new user and every browser
- * tab/window.
- * <p>
- * The main view contains a text field for getting the user name and a button
- * that shows a greeting message in a notification.
- */
 @Route
 public class MainView extends VerticalLayout {
+    private final DataService dataService;
+    private final Grid<Vehicle> vehicleGrid;
 
-    /**
-     * Construct a new Vaadin view.
-     * <p>
-     * Build the initial UI state for the user accessing the application.
-     *
-     * @param service
-     *            The message service. Automatically injected Spring managed bean.
-     */
-    public MainView(@Autowired GreetService service) {
+    public MainView() {
+        this.dataService = new DataService();
+        this.vehicleGrid = new Grid<>(Vehicle.class);
 
-        // Use TextField for standard text input
-        TextField textField = new TextField("Your name");
-        textField.addClassName("bordered");
+        // Form fields
+        TextField makeField = new TextField("Make");
+        TextField modelField = new TextField("Model");
+        TextField yearField = new TextField("Year");
+        TextField typeField = new TextField("Type");
+        TextField licensePlateField = new TextField("License Plate");
+        Checkbox availableCheckbox = new Checkbox("Available");
 
-        // Button click listeners can be defined as lambda expressions
-        Button button = new Button("Say hello", e -> {
-            add(new Paragraph(service.greet(textField.getValue())));
+        // Buttons
+        Button addButton = new Button("Add Vehicle", event -> {
+            Vehicle vehicle = new Vehicle(
+                    makeField.getValue(),
+                    modelField.getValue(),
+                    Integer.parseInt(yearField.getValue()),
+                    typeField.getValue(),
+                    licensePlateField.getValue(),
+                    availableCheckbox.getValue(),
+                    null // ID will be auto-generated
+            );
+            dataService.addVehicle(vehicle);
+            Notification.show("Vehicle added successfully!");
+            refreshGrid();
         });
 
-        // Theme variants give you predefined extra styles for components.
-        // Example: Primary button has a more prominent look.
-        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        Button exportButton = new Button("Export to CSV", event -> {
+            dataService.exportVehicles();
+            Notification.show("Vehicles exported successfully!");
+        });
 
-        // You can specify keyboard shortcuts for buttons.
-        // Example: Pressing enter in this view clicks the Button.
-        button.addClickShortcut(Key.ENTER);
+        // Grid configuration
+        vehicleGrid.setColumns("make", "model", "year", "type", "licensePlate", "available");
+        refreshGrid();
 
-        // Use custom CSS classes to apply styling. This is defined in
-        // styles.css.
-        addClassName("centered-content");
+        // Layout
+        add(makeField, modelField, yearField, typeField, licensePlateField, availableCheckbox, addButton, exportButton, vehicleGrid);
+    }
 
-        add(textField, button);
+    private void refreshGrid() {
+        vehicleGrid.setItems(dataService.getAllVehicles());
     }
 }
